@@ -43,10 +43,6 @@ data("instacart")
 
 Plotting some initial observations
 
-```{r}
-instacart %>% 
-  ggplot(aes(x = department, y = order_number)) + geom_boxplot()
-```
 
 ```{r}
 instacart %>% 
