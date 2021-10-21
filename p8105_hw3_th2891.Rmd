@@ -144,9 +144,35 @@ accel =
   rename_with( ~ str_replace(., "activity_", paste0("minute_", seq_along(along.with = NULL)))) %>% 
   mutate(weekend_vs_weekday =
     recode(day, "Saturday" = "Weekend", "Sunday" = "Weekend", "Monday" = "Weekday", "Tuesday" = "Weekday", "Wednesday" = "Weekday", "Thursday" = "Weekday", "Friday" = "Weekday")) %>% 
-  select(week, day_id, weekend_vs_weekday, everything()) %>% view
+  select(week, day_id, weekend_vs_weekday, everything()) 
 ```
 
 There are `r nrow(accel)` observations in `accel`and the variables are week, day_id, weekend_vs_weekday, and minute_1 to minute_1440. All variables are `numeric` except for `weekend_vs_weekday` and `day` which are class `character`. 
 
+Aggregate over data for total activity for entire day
+
+* making table for aggregated activity `minute_1:minute_1440`
+
+```{r}
+accel %>% 
+  rowwise() %>% 
+  mutate(total_activity = sum(c_across(minute_1:minute_1440), na.rm = TRUE)) %>%
+  select(day_id, day, total_activity) %>% 
+  group_by(day_id, day)
+```
+
+* looking for trends in `total_activity`
+
+```{r}
+accel %>% 
+  rowwise() %>% 
+  mutate(total_activity = sum(c_across(minute_1:minute_1440), na.rm = TRUE)) %>% 
+  mutate(as.integer(total_activity)) %>% 
+  select(day_id, day, total_activity) %>% 
+  group_by(day) %>% 
+  summarize(mean(total_activity))
+```
+
+
+From the `accel` data, looking at `total_activity`, on average, `Friday` has the most activity, followed by `Wednesday` and `Thursday`. On average, `Saturday` has the lowest activity score. 
 
