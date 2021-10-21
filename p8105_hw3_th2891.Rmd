@@ -55,7 +55,7 @@ instacart %>%
 ```
 
 
-There are `r nrow(instacart)` observations in `instacart` and the variables are `r names(instacart)`. All variables are except for `eval_set`, `product_name`, `aisle`, and `department` are class `integer`. The variables named previously are class `character`.
+There are `r nrow(instacart)` observations in `instacart` and the variables are `r names(instacart)`. All variables are class `integer` except for `eval_set`, `product_name`, `aisle`, and `department` are class `integer`. The variables named previously are class `character`.
 There are 134 aisles represented in `instacart`. Fresh fruits and vegetables are the most ordered items followed by pacakged vegetables and fruits. 
 
 ```{r}
@@ -103,7 +103,7 @@ instacart %>%
 
 ## Problem 2
 
-Loading brfss dataset
+Loading brfss data 
 
 ```{r}
 library(p8105.datasets)
@@ -134,6 +134,19 @@ brfss_smart2010 %>%
 
 ## Problem 3
 
+           
+Loading accel data
 
+```{r}
+accel = 
+  read_csv("./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  rename_with( ~ str_replace(., "activity_", paste0("minute_", seq_along(along.with = NULL)))) %>% 
+  mutate(weekend_vs_weekday =
+    recode(day, "Saturday" = "Weekend", "Sunday" = "Weekend", "Monday" = "Weekday", "Tuesday" = "Weekday", "Wednesday" = "Weekday", "Thursday" = "Weekday", "Friday" = "Weekday")) %>% 
+  select(week, day_id, weekend_vs_weekday, everything()) %>% view
+```
+
+There are `r nrow(accel)` observations in `accel`and the variables are week, day_id, weekend_vs_weekday, and minute_1 to minute_1440. All variables are `numeric` except for `weekend_vs_weekday` and `day` which are class `character`. 
 
 
