@@ -110,14 +110,6 @@ instacart %>%
 ```
 
 
-## Need to do:
-
-* give illustrative example of observations
-
-* Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
-
-
-
 ## Problem 2
 
 Loading brfss data 
@@ -150,6 +142,70 @@ brfss_smart2010 %>%
 
 
 ## Problem 3
+
+           
+Loading accel data
+
+```{r}
+accel_df = read_csv("./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  rename_with( ~ str_replace(., "activity_", paste0("minute_", seq_along(along.with = NULL)))) %>% 
+  mutate(weekend_vs_weekday =
+    recode(day, "Saturday" = "Weekend", "Sunday" = "Weekend", "Monday" = "Weekday", "Tuesday" = "Weekday", "Wednesday" = "Weekday", "Thursday" = "Weekday", "Friday" = "Weekday")) %>% 
+  select(week, day_id, weekend_vs_weekday, everything()) 
+```
+
+There are `r nrow(accel_df)` observations in `accel`and the variables are week, day_id, weekend_vs_weekday, and `minute_1` to `minute_1440`. All variables are `numeric` except for `weekend_vs_weekday` and `day` which are class `character`. 
+
+Aggregate over data for total activity for entire day
+
+* making table for aggregated activity `minute_1:minute_1440`
+
+```{r}
+accel_df %>% 
+  rowwise() %>% 
+  mutate(total_activity = sum(c_across(minute_1:minute_1440), na.rm = TRUE)) %>%
+  select(day_id, day, total_activity)
+```
+
+* looking for trends in `total_activity`
+
+```{r}
+accel_df %>% 
+  rowwise() %>% 
+  mutate(total_activity = sum(c_across(minute_1:minute_1440), na.rm = TRUE)) %>% 
+  mutate(as.integer(total_activity)) %>% 
+  select(day_id, day, total_activity) %>% 
+  group_by(day) %>% 
+  summarize(mean_activity = mean(total_activity))
+```
+
+
+From the `accel` data, looking at `total_activity`, on average, `Friday` has the most activity, followed by `Wednesday` and `Thursday`. On average, `Saturday` has the lowest activity score. 
+
+Making a plot for activity in 24 hour period for each day of the week.
+
+```{r}
+accel_df %>% 
+  select(day, minute_1:minute_1440) %>% 
+  pivot_longer(
+    minute_1:minute_1440,
+    names_to = "time",
+    values_to = "activity") %>% 
+   separate(time, into = c("unit", "min_num"), convert = TRUE) %>% mutate(min_num = min_num) %>% 
+  mutate(min_num = as.numeric(min_num)) %>% 
+  group_by(day, min_num) %>% 
+  summarize(avg_activity = mean(activity)) %>% 
+  ggplot(aes(x = min_num, y = avg_activity, color = day)) + geom_smooth(se = FALSE) +
+  scale_x_discrete(limit = c(360, 720, 1080, 1440),
+                   labels = c("6", "12", "18", "24")) +
+  labs(
+    title = "Average activity over 24 hours, over 7 days",
+    x = "time (hrs)",
+    y = "Average activity counts",
+    color = "day"
+  )
+```
 
 
 
